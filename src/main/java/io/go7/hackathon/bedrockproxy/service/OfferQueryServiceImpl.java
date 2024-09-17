@@ -16,9 +16,9 @@ import java.util.Map;
 //@Service
 public class OfferQueryServiceImpl implements OfferQueryService {
 
-    public static final String MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0";
+    public static final String MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0";
     public static final String WRAPPER =
-            "Get from the text IATA airport codes of the cities "
+            "Get from the text IATA airport codes of departure and arrival (if no suggest by the nearest from request) "
                     + "and dates or approximate dates (use year 2024 if not set) "
                     + "and return json as an example "
                     + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date, return_date_date: date } "
@@ -34,12 +34,6 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                     + "return json as an example {  arrival:arrival} "
                     + "Text: %s ";
 
-    public static final String WRAPPER_LANDMARKS =
-            "Extract landmarks from the text for arrival "
-                    + "and return json as an example "
-                    + "{ landmarks: []} "
-                    + "Text: %s ";
-
     @Override
     public OfferQueryResponse getOfferQueryResponse(String query) {
 
@@ -51,6 +45,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             Map<String, Object> map = parseResponse(response);
 
             var offerQueryResponse = new OfferQueryResponse();
+            offerQueryResponse.setExplanation(getExplanation(response));
 
             fillDeparture(map, offerQueryResponse);
 
@@ -133,6 +128,10 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
         Map<String, Object> map = mapper.readValue(json, Map.class);
         return map;
+    }
+
+    private String getExplanation(String response)  {
+        return response.substring(response.indexOf("Explanation:"));
     }
 
     private void fillDepartureDate(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {

@@ -20,4 +20,7 @@ public class OfferQueryResponse {
 
       private List<String> news;
 
+      private String explanation;
+
+
 }
