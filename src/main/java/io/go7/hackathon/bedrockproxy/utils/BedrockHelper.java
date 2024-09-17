@@ -387,7 +387,8 @@ public class BedrockHelper {
 
             var text = new JSONPointer("/text").queryFrom(responseBody).toString();
 
-            String jsonText = text.substring(text.indexOf("```json") + 7, text.lastIndexOf("```"));
+            String jsonText = text.substring(text.contains("```json") ? text.indexOf("```json") + 7 : 0,
+                    text.lastIndexOf("```", 7) > 0 ? text.lastIndexOf("```", 7) : text.length());
             JSONArray array = new JSONArray(jsonText);
             ArrayList<String> strings = new ArrayList<>(array.length());
             for (int i = 0; i < array.length(); i++) {

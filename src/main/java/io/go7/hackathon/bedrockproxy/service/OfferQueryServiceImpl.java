@@ -79,7 +79,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     }
 
     public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
-        String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, news alerts, safety concerns, events and suggested activities";
+        String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, news alerts, safety concerns, events and suggested activities, use emojis";
 
         ArrayList<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
                 .replace("{{DATE}}", date.toString()));
