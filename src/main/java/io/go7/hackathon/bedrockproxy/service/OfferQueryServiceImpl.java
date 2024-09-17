@@ -22,7 +22,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             "Get from the text IATA airport codes of departure and arrival (if no suggest by the nearest from request) "
                     + "and dates or approximate dates (use year 2024 if not set) "
                     + "and return json as an example "
-                    + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date, return_date_date: date } "
+                    + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date } "
                     + "Text: %s ";
 
     public static final String WRAPPER_DATE =
