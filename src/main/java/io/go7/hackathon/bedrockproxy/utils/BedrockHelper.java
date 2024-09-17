@@ -1,5 +1,6 @@
 package io.go7.hackathon.bedrockproxy.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONPointer;
@@ -56,6 +57,7 @@ import java.util.concurrent.ExecutionException;
  * This class contains basic methods for invoking AWS Bedrock generative AI model.
  * It supports knowledge bases, invoking the model with streaming, invoking hte model without streaming
  */
+@Slf4j
 public class BedrockHelper {
     /*
     method to invoke AWS Bedrock model and get the response without streaming.
@@ -412,7 +414,8 @@ public class BedrockHelper {
 
             return strings;
 
-        } catch (SdkClientException e) {
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
             return Collections.emptyList();
         }
     }
