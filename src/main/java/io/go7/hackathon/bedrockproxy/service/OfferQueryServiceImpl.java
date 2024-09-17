@@ -19,14 +19,25 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     public static final String MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0";
     public static final String WRAPPER =
             "Get from the text IATA airport codes of the cities "
-                    + "and dates or approximate dates "
+                    + "and dates or approximate dates (use year 2024 if not set) "
                     + "and return json as an example "
-                    + "{ departure: departure, arrival:arrival, departure_date: date} "
+                    + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date, return_date_date: date } "
                     + "Text: %s ";
 
     public static final String WRAPPER_DATE =
-            "Get from the text nearest date and "
-                    + "return json as an example { departure: departure, arrival:arrival, departure_date: date} "
+            "Get from the text nearest date (use year 2024 if not set) and "
+                    + "return json as an example { departure_date: date} "
+                    + "Text: %s ";
+
+    public static final String WRAPPER_ARRIVAL =
+            "Find nearest most suitable IATA airport code for destination, not departure, based on landmarks in text"
+                    + "return json as an example {  arrival:arrival} "
+                    + "Text: %s ";
+
+    public static final String WRAPPER_LANDMARKS =
+            "Extract landmarks from the text for arrival "
+                    + "and return json as an example "
+                    + "{ landmarks: []} "
                     + "Text: %s ";
 
     @Override
@@ -47,14 +58,19 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
             fillDepartureDate(map, offerQueryResponse);
 
+            fillReturnDate(map, offerQueryResponse);
+
+
             if (offerQueryResponse.getPassengers().isEmpty()) {
                 offerQueryResponse.getPassengers().add(new PassengerQuantity("ADT", 1));
             }
 
-            if(offerQueryResponse.getDepartureDate() == null) {
-                var date_response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_DATE.formatted(query));
-                Map<String, Object> date_map = parseResponse(date_response);
-                fillDepartureDate(date_map, offerQueryResponse);
+            if (offerQueryResponse.getDepartureDate() == null) {
+                tryToFillDateOneMoreTime(query, offerQueryResponse);
+            }
+
+            if (offerQueryResponse.getArrival() == null) {
+                tryToFillArrivalOneMoreTime(query, offerQueryResponse);
             }
 
             if (offerQueryResponse.getArrival() != null && offerQueryResponse.getDepartureDate() != null) {
@@ -78,6 +94,16 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     }
 
+    private void fillReturnDate(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
+        try {
+            if (map.containsKey("return_date")) {
+                offerQueryResponse.setReturnDate(LocalDate.parse(map.get("return_date").toString()));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
     public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
         String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, news alerts, safety concerns, events and suggested activities, use emojis";
 
@@ -85,6 +111,18 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 .replace("{{DATE}}", date.toString()));
 
         offerQueryResponse.setNews(news);
+    }
+
+    private void tryToFillDateOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
+        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_DATE.formatted(query));
+        Map<String, Object> map = parseResponse(response);
+        fillDepartureDate(map, offerQueryResponse);
+    }
+
+    private void tryToFillArrivalOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
+        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_LANDMARKS.formatted(query));
+        Map<String, Object> map = parseResponse(response);
+        fillArrival(map, offerQueryResponse);
     }
 
     private Map<String, Object> parseResponse(String response) throws JsonProcessingException {
@@ -151,7 +189,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     private boolean mandatoryDataFilled(OfferQueryResponse offerQueryResponse) {
         return !offerQueryResponse.getPassengers().isEmpty()
                 && offerQueryResponse.getDeparture() != null
-                && ! offerQueryResponse.getArrival().isEmpty()
+                && !offerQueryResponse.getArrival().isEmpty()
                 && offerQueryResponse.getDepartureDate() != null;
     }
 }
