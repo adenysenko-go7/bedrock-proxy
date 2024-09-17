@@ -412,6 +412,7 @@ public class BedrockHelper {
                 strings.add(string);
             }
 
+
             return strings;
 
         } catch (Exception e) {
