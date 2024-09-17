@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Map;
 
 @Slf4j
@@ -56,6 +57,10 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 fillDepartureDate(date_map, offerQueryResponse);
             }
 
+            if (offerQueryResponse.getArrival() != null && offerQueryResponse.getDepartureDate() != null) {
+                fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
+            }
+
             if (mandatoryDataFilled(offerQueryResponse)) {
                 offerQueryResponse.setFinalResult(true);
             } else {
@@ -71,6 +76,15 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             return offerQueryResponse;
         }
 
+    }
+
+    public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
+        String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, news alerts, safety concerns, events and suggested activities";
+
+        ArrayList<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
+                .replace("{{DATE}}", date.toString()));
+
+        offerQueryResponse.setNews(news);
     }
 
     private Map<String, Object> parseResponse(String response) throws JsonProcessingException {

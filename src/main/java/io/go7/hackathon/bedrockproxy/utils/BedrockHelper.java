@@ -1,5 +1,6 @@
 package io.go7.hackathon.bedrockproxy.utils;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONPointer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
@@ -66,15 +67,8 @@ public class BedrockHelper {
 
             // Create a Bedrock Runtime client in the AWS Region you want to use.
             // Replace the DefaultCredentialsProvider with your preferred credentials provider.
-            BedrockRuntimeClient client = BedrockRuntimeClient.builder()
-                .credentialsProvider(StaticCredentialsProvider.create(
-                        AwsBasicCredentials.create(
-                                "AKIAX2DZEWJ5VWICD6PM",
-                                "RNZ9R5I5zo2Tp8t3PEvN2Nzv02wtamn1UqV32utZ")))
-                .region(Region.US_EAST_1)
-                .build();
-    
-            // Set the model ID, e.g., Claude 3 Haiku.
+
+        // Set the model ID, e.g., Claude 3 Haiku.
             
     
             // The InvokeModel API uses the model's native payload.
@@ -93,11 +87,11 @@ public class BedrockHelper {
     
             // Define the prompt for the model.
            
-    
+
             // Embed the prompt in the model's native request payload.
             String nativeRequest = nativeRequestTemplate.replace("{{prompt}}", prompt);
-    
-            try {
+
+            try(BedrockRuntimeClient client = initClient()) {
                 // Encode and send the request to the Bedrock Runtime.
                 InvokeModelResponse response = client.invokeModel(request -> request
                         .body(SdkBytes.fromUtf8String(nativeRequest))
@@ -108,10 +102,8 @@ public class BedrockHelper {
                 var responseBody = new JSONObject(response.body().asUtf8String());
     
                 // Retrieve the generated text from the model's response.
-                var text = new JSONPointer("/content/0/text").queryFrom(responseBody).toString();
-                System.out.println(text);
-    
-                return text;
+
+                return new JSONPointer("/content/0/text").queryFrom(responseBody).toString();
     
             } 
             catch (SdkClientException e) 
@@ -121,15 +113,25 @@ public class BedrockHelper {
             }
     }
 
+    private static BedrockRuntimeClient initClient() {
+        BedrockRuntimeClient client = BedrockRuntimeClient.builder()
+            .credentialsProvider(StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(
+                            "AKIAX2DZEWJ54LNY5TTL", "FWPHleWlRcwTs1NwTkiNJPzbm0kvJOq6Xra8alhM")))
+            .region(Region.US_EAST_1)
+            .build();
+        return client;
+    }
 
-   /*
-    method to invoke AWS Bedrock model and get the response with streaming.
-    Parameters:
-    ModelId: The ID of the Bedrock model to invoke.
-    Body: The input to the model as a JSON string.
-    Returns:
-    The response from the model as a stream of JSON strings.
-    */
+
+    /*
+     method to invoke AWS Bedrock model and get the response with streaming.
+     Parameters:
+     ModelId: The ID of the Bedrock model to invoke.
+     Body: The input to the model as a JSON string.
+     Returns:
+     The response from the model as a stream of JSON strings.
+     */
     public static String invokeModelWithStream(String modelId, String prompt) {
         // Create a Bedrock Runtime client in the AWS Region you want to use.
         // Replace the DefaultCredentialsProvider with your preferred credentials provider.
@@ -360,7 +362,43 @@ public class BedrockHelper {
                 textractClient.close();
         }
     }
-    
 
-    
+
+
+    public static ArrayList<String> invokeCohere(String prompt) {
+        var nativeRequestTemplate = """
+                {
+                    "message": "{{prompt}}",
+                    "temperature": 1,
+                    "return_prompt": true
+                }""";
+
+
+        String nativeRequest = nativeRequestTemplate.replace("{{prompt}}", prompt);
+
+        try(BedrockRuntimeClient client = initClient()) {
+
+            InvokeModelResponse response = client.invokeModel(request -> request
+                    .body(SdkBytes.fromUtf8String(nativeRequest))
+                    .modelId("cohere.command-r-plus-v1:0")
+            );
+
+            var responseBody = new JSONObject(response.body().asUtf8String());
+
+            var text = new JSONPointer("/text").queryFrom(responseBody).toString();
+
+            String jsonText = text.substring(text.indexOf("```json") + 7, text.lastIndexOf("```"));
+            JSONArray array = new JSONArray(jsonText);
+            ArrayList<String> strings = new ArrayList<>(array.length());
+            for (int i = 0; i < array.length(); i++) {
+                String string = array.getString(i);
+                strings.add(string);
+            }
+
+            return strings;
+
+        } catch (SdkClientException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
