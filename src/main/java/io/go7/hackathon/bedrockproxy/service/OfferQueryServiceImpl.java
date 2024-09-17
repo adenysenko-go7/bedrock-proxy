@@ -21,7 +21,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                     + "and dates or approximate dates (use year 2024 if not set, dates only in future) "
                     + "and return json as an example "
                     + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date } "
-                    + "Explain in bock Explanation at the end. "
+                    + "Explain in bock Explanation at the end. Assume that today is %s "
                     + "Text: %s ";
 
     @Override
@@ -30,7 +30,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
         try {
 
-            var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER.formatted(query));
+            var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER.formatted(LocalDate.now(), query));
 
             Map<String, Object> map = parseResponse(response);
 

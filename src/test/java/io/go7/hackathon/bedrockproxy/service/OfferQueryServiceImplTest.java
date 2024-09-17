@@ -11,7 +11,7 @@ class OfferQueryServiceImplTest {
 
     private OfferQueryServiceImpl offerQueryService = new OfferQueryServiceImpl();
 
-//    @Test
+    @Test
     void getOfferQueryResponse1() {
 
         String query = "Find me offers from Berlin to Barcelona at the end of October";
@@ -57,6 +57,20 @@ class OfferQueryServiceImplTest {
     void getOfferQueryResponse4() {
 
         String query = "Suggest me round trip ticket options for two adult passengers from Warsaw to Athens for October 2024";
+        OfferQueryResponse offerQueryResponse = offerQueryService.getOfferQueryResponse(query);
+        System.out.println(offerQueryResponse);
+
+        assertNotNull(offerQueryResponse.getDepartureDate());
+        assertNotNull(offerQueryResponse.getArrival());
+        assertNotNull(offerQueryResponse.getDeparture());
+        assertNotEquals(offerQueryResponse.getArrival(), offerQueryResponse.getDeparture());
+
+    }
+
+    @Test
+    void getOfferQueryResponse5() {
+
+        String query = "want to go somewhere nice and warm soon from Berlin";
         OfferQueryResponse offerQueryResponse = offerQueryService.getOfferQueryResponse(query);
         System.out.println(offerQueryResponse);
 
