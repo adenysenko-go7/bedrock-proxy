@@ -17,10 +17,10 @@ public class GetCohereNewsLambda implements RequestHandler<APIGatewayProxyReques
   public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
     GetCohereNewsRequest getCohereNewsRequest = JsonUtils.readJson(request.getBody(), GetCohereNewsRequest.class);
 
-    System.out.println("locations: " + getCohereNewsRequest.getLocations());
+    System.out.println("locations: " + getCohereNewsRequest.getDestination());
     System.out.println("date: " + getCohereNewsRequest.getDate());
 
-    List<String> recommendations = cohereNewsService.getRecommendations(getCohereNewsRequest.getLocations(), getCohereNewsRequest.getDate());
+    List<String> recommendations = cohereNewsService.getRecommendations(getCohereNewsRequest.getDestination(), getCohereNewsRequest.getDate());
 
     APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
     responseEvent.setStatusCode(200);

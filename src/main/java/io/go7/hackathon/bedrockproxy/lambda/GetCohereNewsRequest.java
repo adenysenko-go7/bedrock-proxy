@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 public class GetCohereNewsRequest {
-  private String locations;
+  private String destination;
   private LocalDate date;
 }
