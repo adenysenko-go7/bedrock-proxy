@@ -18,8 +18,6 @@ public class OfferQueryResponse {
       private boolean finalResult;
       private String requestHint;
 
-      private List<String> news;
-
       private String explanation;
 
 
