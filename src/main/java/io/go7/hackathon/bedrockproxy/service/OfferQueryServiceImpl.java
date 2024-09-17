@@ -169,19 +169,19 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         if (offerQueryResponse.getDeparture() == null
                 && offerQueryResponse.getArrival() == null
                 && offerQueryResponse.getDepartureDate() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your departure and arrival places and date for your trip");
+            offerQueryResponse.setRequestHint("Please provide information about your departure and arrival locations and date for your trip");
         } else if (offerQueryResponse.getDeparture() == null && offerQueryResponse.getArrival() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your departure and arrival places are");
+            offerQueryResponse.setRequestHint("Please provide information about your departure and arrival locations");
         } else if (offerQueryResponse.getDepartureDate() == null && offerQueryResponse.getArrival() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your arrival place and trip date");
+            offerQueryResponse.setRequestHint("Please provide information about your arrival location and trip date");
         } else if (offerQueryResponse.getDepartureDate() == null && offerQueryResponse.getDepartureDate() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your departure and trip date");
+            offerQueryResponse.setRequestHint("Please provide information about your departure location and trip date");
         } else if (offerQueryResponse.getDeparture() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your departure place");
+            offerQueryResponse.setRequestHint("Please provide information about your departure location");
         } else if (offerQueryResponse.getArrival() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your arrival place");
+            offerQueryResponse.setRequestHint("Please provide information about your arrival location");
         } else if (offerQueryResponse.getDepartureDate() == null) {
-            offerQueryResponse.setRequestHint("Please provide information about where your trip date");
+            offerQueryResponse.setRequestHint("Please provide information about your trip date");
         }
 
     }
