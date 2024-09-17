@@ -69,16 +69,17 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 tryToFillArrivalOneMoreTime(query, offerQueryResponse);
             }
 
-            if (StringUtils.isNotBlank(offerQueryResponse.getArrival())
-                    && offerQueryResponse.getDepartureDate() != null && offerQueryResponse.isFinalResult()) {
-                fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
-            }
-
             if (mandatoryDataFilled(offerQueryResponse)) {
                 offerQueryResponse.setFinalResult(true);
             } else {
                 generateHint(offerQueryResponse);
             }
+
+            if (StringUtils.isNotBlank(offerQueryResponse.getArrival())
+                    && offerQueryResponse.getDepartureDate() != null && offerQueryResponse.isFinalResult()) {
+                fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
+            }
+
             return offerQueryResponse;
 
         } catch (Exception e) {
