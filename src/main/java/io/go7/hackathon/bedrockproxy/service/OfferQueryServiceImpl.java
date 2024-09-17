@@ -20,7 +20,16 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     public static final String MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0";
     public static final String WRAPPER =
-            "Get from the text IATA airport codes of the cities and dates or approximate dates and return only json as an example { departure: departure, arrival:arrival, departure_date: departure date} Text: %s ";
+            "Get from the text IATA airport codes of the cities "
+                    + "and dates or approximate dates "
+                    + "and return json as an example "
+                    + "{ departure: departure, arrival:arrival, departure_date: date} "
+                    + "Text: %s ";
+
+    public static final String WRAPPER_DATE =
+            "Get from the text nearest date and "
+                    + "return json as an example { departure: departure, arrival:arrival, departure_date: date} "
+                    + "Text: %s ";
 
     @Override
     public OfferQueryResponse getOfferQueryResponse(String query) {
@@ -30,12 +39,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
             var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER.formatted(query));
 
-            var json = response.substring(response.indexOf("{"));
-            json = json.substring(0, json.indexOf("}") + 1);
-
-            var mapper = new ObjectMapper();
-
-            Map<String, Object> map = mapper.readValue(json, Map.class);
+            Map<String, Object> map = parseResponse(response);
 
             var offerQueryResponse = new OfferQueryResponse();
 
@@ -47,6 +51,12 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
             if (offerQueryResponse.getPassengers().isEmpty()) {
                 offerQueryResponse.getPassengers().add(new PassengerQuantity(PassengerTypeGroup.ADULT, 1));
+            }
+
+            if(offerQueryResponse.getDepartureDate() == null) {
+                var date_response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_DATE.formatted(query));
+                Map<String, Object> date_map = parseResponse(date_response);
+                fillDepartureDate(date_map, offerQueryResponse);
             }
 
             if (mandatoryDataFilled(offerQueryResponse)) {
@@ -66,7 +76,17 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     }
 
-    private static void fillDepartureDate(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
+    private Map<String, Object> parseResponse(String response) throws JsonProcessingException {
+        var json = response.substring(response.indexOf("{"));
+        json = json.substring(0, json.indexOf("}") + 1);
+
+        var mapper = new ObjectMapper();
+
+        Map<String, Object> map = mapper.readValue(json, Map.class);
+        return map;
+    }
+
+    private void fillDepartureDate(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
         try {
             if (map.containsKey("departure_date")) {
                 offerQueryResponse.setDepartureDate(LocalDate.parse(map.get("departure_date").toString()));
@@ -76,7 +96,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         }
     }
 
-    private static void fillArrival(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
+    private void fillArrival(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
         try {
             if (map.containsKey("arrival")) {
                 offerQueryResponse.getArrival().add(AirportCode.of(map.get("arrival").toString()));
@@ -86,7 +106,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         }
     }
 
-    private static void fillDeparture(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
+    private void fillDeparture(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
         try {
             if (map.containsKey("departure")) {
                 offerQueryResponse.setDeparture(AirportCode.of(map.get("departure").toString()));
