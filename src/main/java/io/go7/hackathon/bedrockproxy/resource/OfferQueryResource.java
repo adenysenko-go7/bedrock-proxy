@@ -1,5 +1,6 @@
 package io.go7.hackathon.bedrockproxy.resource;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -7,13 +8,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.go7.hackathon.bedrockproxy.beans.OfferQueryResponse;
+import io.go7.hackathon.bedrockproxy.service.OfferQueryService;
 import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 
 @RestController
 @RequestMapping("/offer-query")
+@RequiredArgsConstructor
 public class OfferQueryResource {
 
-    public static final String MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0";
+    private final OfferQueryService offerQueryService;
+
 
     @GetMapping("/echo")
     public String echo() {
@@ -21,13 +26,13 @@ public class OfferQueryResource {
     }
 
     @GetMapping("/{prompt}")
-    public String getPromptResult(@PathVariable String prompt) {
-        return BedrockHelper.invokeModel(MODEL_ID, prompt);
+    public OfferQueryResponse getPromptResult(@PathVariable String prompt) {
+        return offerQueryService.getOfferQueryResponse(prompt);
     }
 
     @PostMapping()
-    public String postPrompt(@RequestBody String prompt) {
-        return BedrockHelper.invokeModel(MODEL_ID, prompt);
+    public OfferQueryResponse postPrompt(@RequestBody String prompt) {
+        return offerQueryService.getOfferQueryResponse(prompt);
     }
 
 }
