@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.utils.StringUtils;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -133,11 +132,15 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         return map;
     }
 
-    private String getExplanation(String response)  {
+    private String getExplanation(String response) {
         try {
-            return response.substring(response.indexOf("Explanation:"));
-        }
-        catch (Exception e) {
+            if (response.contains("Explanation:")) {
+                return response.substring(response.indexOf("Explanation:") + 12);
+            } else if (response.contains("Notes:")) {
+                return response.substring(response.indexOf("Notes:" + 6));
+            }
+            return "";
+        } catch (Exception e) {
             return "";
         }
     }
