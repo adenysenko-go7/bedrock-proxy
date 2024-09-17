@@ -75,11 +75,6 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 generateHint(offerQueryResponse);
             }
 
-            if (StringUtils.isNotBlank(offerQueryResponse.getArrival())
-                    && offerQueryResponse.getDepartureDate() != null && offerQueryResponse.isFinalResult()) {
-                fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
-            }
-
             return offerQueryResponse;
 
         } catch (Exception e) {
@@ -100,15 +95,6 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-    }
-
-    public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
-        String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, mention a relevant piece of recent news, warn of peak dates or better destinations, safety concerns, events and suggested activities, use emojis";
-
-        List<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
-                .replace("{{DATE}}", date.toString()));
-
-        offerQueryResponse.setNews(news);
     }
 
     private void tryToFillDateOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
