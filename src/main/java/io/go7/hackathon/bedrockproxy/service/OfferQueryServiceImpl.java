@@ -1,7 +1,9 @@
 package io.go7.hackathon.bedrockproxy.service;
 
 import io.go7.commons.flight.AirportCode;
+import io.go7.commons.flight.PassengerTypeGroup;
 import io.go7.hackathon.bedrockproxy.beans.OfferQueryResponse;
+import io.go7.hackathon.bedrockproxy.beans.PassengerQuantity;
 import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -49,6 +51,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 offerQueryResponse.setDepartureDate(LocalDate.parse(map.get("departure_date").toString()));
             }
 
+            offerQueryResponse.getPassengers().add(new PassengerQuantity(PassengerTypeGroup.ADULT, 1));
             offerQueryResponse.setFinalResult(true);
             return offerQueryResponse;
 
