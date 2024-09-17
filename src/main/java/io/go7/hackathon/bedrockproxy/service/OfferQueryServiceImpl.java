@@ -7,6 +7,7 @@ import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.utils.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -68,7 +69,8 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 tryToFillArrivalOneMoreTime(query, offerQueryResponse);
             }
 
-            if (offerQueryResponse.getArrival() != null && offerQueryResponse.getDepartureDate() != null) {
+            if (StringUtils.isNotBlank(offerQueryResponse.getArrival())
+                    && offerQueryResponse.getDepartureDate() != null && offerQueryResponse.isFinalResult()) {
                 fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
             }
 
