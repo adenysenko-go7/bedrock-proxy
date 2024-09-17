@@ -79,7 +79,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             }
             return offerQueryResponse;
 
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
             OfferQueryResponse offerQueryResponse = new OfferQueryResponse();
             offerQueryResponse.setFinalResult(false);
