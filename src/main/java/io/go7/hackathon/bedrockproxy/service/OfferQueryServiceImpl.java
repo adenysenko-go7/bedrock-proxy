@@ -9,13 +9,13 @@ import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+//import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Map;
 
 @Slf4j
-@Service
+//@Service
 public class OfferQueryServiceImpl implements OfferQueryService {
 
     public static final String MODEL_ID = "anthropic.claude-3-sonnet-20240229-v1:0";
