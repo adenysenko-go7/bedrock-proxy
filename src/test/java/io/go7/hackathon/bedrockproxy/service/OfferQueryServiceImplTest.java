@@ -56,6 +56,8 @@ class OfferQueryServiceImplTest {
         LocalDate date = LocalDate.now().plusDays(random.nextInt(1, 100));
 
         OfferQueryResponse offerQueryResponse = new OfferQueryResponse();
+        offerQueryResponse.setFinalResult(true);
+
         offerQueryService.fillNews(offerQueryResponse, airports[random.nextInt(0, 50)], date);
 
         assert !offerQueryResponse.getNews().isEmpty();
