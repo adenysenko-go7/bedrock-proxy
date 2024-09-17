@@ -11,6 +11,7 @@ import software.amazon.awssdk.utils.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -104,7 +105,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
         String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, mention a relevant piece of recent news, warn of peak dates or better destinations, safety concerns, events and suggested activities, use emojis";
 
-        ArrayList<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
+        List<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
                 .replace("{{DATE}}", date.toString()));
 
         offerQueryResponse.setNews(news);
