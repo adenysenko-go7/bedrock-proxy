@@ -47,6 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -378,7 +379,7 @@ public class BedrockHelper {
 
 
 
-    public static ArrayList<String> invokeCohere(String prompt) {
+    public static List<String> invokeCohere(String prompt) {
         var nativeRequestTemplate = """
                 {
                     "message": "{{prompt}}",
@@ -412,7 +413,7 @@ public class BedrockHelper {
             return strings;
 
         } catch (SdkClientException e) {
-            throw new RuntimeException(e);
+            return Collections.emptyList();
         }
     }
 }

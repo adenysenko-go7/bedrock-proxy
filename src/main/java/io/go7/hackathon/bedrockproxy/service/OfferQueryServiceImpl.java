@@ -7,9 +7,11 @@ import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.utils.StringUtils;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -68,7 +70,8 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 tryToFillArrivalOneMoreTime(query, offerQueryResponse);
             }
 
-            if (offerQueryResponse.getArrival() != null && offerQueryResponse.getDepartureDate() != null) {
+            if (StringUtils.isNotBlank(offerQueryResponse.getArrival())
+                    && offerQueryResponse.getDepartureDate() != null && offerQueryResponse.isFinalResult()) {
                 fillNews(offerQueryResponse, offerQueryResponse.getArrival(), offerQueryResponse.getDepartureDate());
             }
 
@@ -102,7 +105,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     public void fillNews(OfferQueryResponse offerQueryResponse, String location, LocalDate date) {
         String prompt = "short recommendations for travelers flying to {{AIRPORT}} on {{DATE}}, formatted as a json array of strings - include weather forecast, mention a relevant piece of recent news, warn of peak dates or better destinations, safety concerns, events and suggested activities, use emojis";
 
-        ArrayList<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
+        List<String> news = BedrockHelper.invokeCohere(prompt.replace("{{AIRPORT}}", location)
                 .replace("{{DATE}}", date.toString()));
 
         offerQueryResponse.setNews(news);
