@@ -138,7 +138,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             if (response.contains("Explanation:")) {
                 return response.substring(response.indexOf("Explanation:") + 12);
             } else if (response.contains("Notes:")) {
-                return response.substring(response.indexOf("Notes:" + 6));
+                return response.substring(response.indexOf("Notes:") + 6);
             }
             return "";
         } catch (Exception e) {
