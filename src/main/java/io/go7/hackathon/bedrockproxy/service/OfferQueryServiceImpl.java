@@ -120,7 +120,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     }
 
     private void tryToFillArrivalOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
-        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_LANDMARKS.formatted(query));
+        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_ARRIVAL.formatted(query));
         Map<String, Object> map = parseResponse(response);
         fillArrival(map, offerQueryResponse);
     }
