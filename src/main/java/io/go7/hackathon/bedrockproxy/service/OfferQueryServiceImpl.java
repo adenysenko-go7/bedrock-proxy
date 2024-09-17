@@ -17,7 +17,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     public static final String MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0";
     public static final String WRAPPER =
-            "Get from the text IATA airport codes of departure and arrival (if no suggest by the nearest from request) "
+            "Get from the text IATA airport codes of departure and arrival (if no suggest any by the nearest from request) "
                     + "and dates or approximate dates (use year 2024 if not set, dates only in future), "
                     + "count passengers by types Adults (ADT), Children (CHD), Infants (INF) "
                     + "and return json as an example "

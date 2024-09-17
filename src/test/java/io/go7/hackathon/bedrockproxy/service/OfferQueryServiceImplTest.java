@@ -32,7 +32,7 @@ class OfferQueryServiceImplTest {
     @Test
     void getOfferQueryResponse2() {
 
-        String query = "Where can you fly for snowboarding cheaper in December from Warsaw?";
+        String query = "Where can you fly somewhere for snowboarding in December from Warsaw?";
         OfferQueryResponse offerQueryResponse = offerQueryService.getOfferQueryResponse(query);
         System.out.println(offerQueryResponse);
 
@@ -111,6 +111,40 @@ class OfferQueryServiceImplTest {
         assertEquals(2, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("ADT")).findFirst().orElseThrow().getQuantity());
         assertEquals(2, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("CHD")).findFirst().orElseThrow().getQuantity());
         assertEquals(1, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("INF")).findFirst().orElseThrow().getQuantity());
+
+    }
+
+    @Test
+    void getOfferQueryResponse7() {
+
+        String query = "Find me tickets to celebrate Hanukkah this year. I'm in Madrid";
+        OfferQueryResponse offerQueryResponse = offerQueryService.getOfferQueryResponse(query);
+        System.out.println(offerQueryResponse);
+
+        assertNotNull(offerQueryResponse.getDepartureDate());
+        assertNotNull(offerQueryResponse.getArrival());
+        assertNotNull(offerQueryResponse.getDeparture());
+        assertNotEquals(offerQueryResponse.getArrival(), offerQueryResponse.getDeparture());
+        assertEquals(1, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("ADT")).findFirst().orElseThrow().getQuantity());
+        assertEquals(0, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("CHD")).findFirst().orElseThrow().getQuantity());
+        assertEquals(0, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("INF")).findFirst().orElseThrow().getQuantity());
+
+    }
+
+    @Test
+    void getOfferQueryResponse8() {
+
+        String query = "Want to go somewhere nice and warm soon from Warsaw";
+        OfferQueryResponse offerQueryResponse = offerQueryService.getOfferQueryResponse(query);
+        System.out.println(offerQueryResponse);
+
+        assertNotNull(offerQueryResponse.getDepartureDate());
+        assertNotNull(offerQueryResponse.getArrival());
+        assertNotNull(offerQueryResponse.getDeparture());
+        assertNotEquals(offerQueryResponse.getArrival(), offerQueryResponse.getDeparture());
+        assertEquals(1, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("ADT")).findFirst().orElseThrow().getQuantity());
+        assertEquals(0, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("CHD")).findFirst().orElseThrow().getQuantity());
+        assertEquals(0, offerQueryResponse.getPassengers().stream().filter(pq->pq.getType().equals("INF")).findFirst().orElseThrow().getQuantity());
 
     }
 
