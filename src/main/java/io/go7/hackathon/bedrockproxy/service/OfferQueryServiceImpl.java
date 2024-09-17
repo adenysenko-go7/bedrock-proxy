@@ -131,7 +131,12 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     }
 
     private String getExplanation(String response)  {
-        return response.substring(response.indexOf("Explanation:"));
+        try {
+            return response.substring(response.indexOf("Explanation:"));
+        }
+        catch (Exception e) {
+            return "";
+        }
     }
 
     private void fillDepartureDate(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
