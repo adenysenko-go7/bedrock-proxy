@@ -133,7 +133,7 @@ public class BedrockHelper {
             return BedrockRuntimeClient.builder()
                 .credentialsProvider(StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(
-                        "AKIAX2DZEWJ54LNY5TTL", "FWPHleWlRcwTs1NwTkiNJPzbm0kvJOq6Xra8alhM")))
+                        "", "")))
                 .region(Region.US_EAST_1)
                 .build();
         }
