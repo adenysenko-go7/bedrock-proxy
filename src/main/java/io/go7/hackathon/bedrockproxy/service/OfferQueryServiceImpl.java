@@ -18,9 +18,10 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     public static final String MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0";
     public static final String WRAPPER =
             "Get from the text IATA airport codes of departure and arrival (if no suggest by the nearest from request) "
-                    + "and dates or approximate dates (use year 2024 if not set, dates only in future) "
+                    + "and dates or approximate dates (use year 2024 if not set, dates only in future), "
+                    + "count passengers by types Adults (ADT), Children (CHD), Infants (INF) "
                     + "and return json as an example "
-                    + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date } "
+                    + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date, adt: 1, chd: 1, inf: 1 } "
                     + "Explain in bock Explanation at the end. Assume that today is %s "
                     + "Text: %s ";
 
@@ -45,6 +46,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
             fillReturnDate(map, offerQueryResponse);
 
+            fillPassengers(map, offerQueryResponse);
 
             if (offerQueryResponse.getPassengers().isEmpty()) {
                 offerQueryResponse.getPassengers().add(new PassengerQuantity("ADT", 1));
@@ -72,6 +74,22 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         try {
             if (map.containsKey("return_date")) {
                 offerQueryResponse.setReturnDate(LocalDate.parse(map.get("return_date").toString()));
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void fillPassengers(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
+        try {
+            if (map.containsKey("adt")) {
+                offerQueryResponse.getPassengers().add(new PassengerQuantity("ADT", Integer.parseInt(map.get("adt").toString())));
+            }
+            if (map.containsKey("chd")) {
+                offerQueryResponse.getPassengers().add(new PassengerQuantity("CHD", Integer.parseInt(map.get("chd").toString())));
+            }
+            if (map.containsKey("inf")) {
+                offerQueryResponse.getPassengers().add(new PassengerQuantity("INF", Integer.parseInt(map.get("inf").toString())));
             }
         } catch (Exception e) {
             log.error(e.getMessage());
