@@ -7,10 +7,8 @@ import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import software.amazon.awssdk.utils.StringUtils;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -23,16 +21,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                     + "and dates or approximate dates (use year 2024 if not set) "
                     + "and return json as an example "
                     + "{ departure: departure, arrival:arrival, departure_date: date, return_date: date } "
-                    + "Text: %s ";
-
-    public static final String WRAPPER_DATE =
-            "Get from the text nearest date (use year 2024 if not set) and "
-                    + "return json as an example { departure_date: date} "
-                    + "Text: %s ";
-
-    public static final String WRAPPER_ARRIVAL =
-            "Find nearest most suitable IATA airport code for destination, not departure, based on landmarks in text"
-                    + "return json as an example {  arrival:arrival} "
+                    + "Explain in bock Explanation at the end. "
                     + "Text: %s ";
 
     @Override
@@ -61,14 +50,6 @@ public class OfferQueryServiceImpl implements OfferQueryService {
                 offerQueryResponse.getPassengers().add(new PassengerQuantity("ADT", 1));
             }
 
-            if (offerQueryResponse.getDepartureDate() == null) {
-                tryToFillDateOneMoreTime(query, offerQueryResponse);
-            }
-
-            if (offerQueryResponse.getArrival() == null) {
-                tryToFillArrivalOneMoreTime(query, offerQueryResponse);
-            }
-
             if (mandatoryDataFilled(offerQueryResponse)) {
                 offerQueryResponse.setFinalResult(true);
             } else {
@@ -95,18 +76,6 @@ public class OfferQueryServiceImpl implements OfferQueryService {
         } catch (Exception e) {
             log.error(e.getMessage());
         }
-    }
-
-    private void tryToFillDateOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
-        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_DATE.formatted(query));
-        Map<String, Object> map = parseResponse(response);
-        fillDepartureDate(map, offerQueryResponse);
-    }
-
-    private void tryToFillArrivalOneMoreTime(String query, OfferQueryResponse offerQueryResponse) throws JsonProcessingException {
-        var response = BedrockHelper.invokeModel(MODEL_ID, WRAPPER_ARRIVAL.formatted(query));
-        Map<String, Object> map = parseResponse(response);
-        fillArrival(map, offerQueryResponse);
     }
 
     private Map<String, Object> parseResponse(String response) throws JsonProcessingException {
