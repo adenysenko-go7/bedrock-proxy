@@ -5,8 +5,10 @@ import org.json.JSONObject;
 import org.json.JSONPointer;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.core.SdkSystemSetting;
 import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.bedrockagentruntime.BedrockAgentRuntimeAsyncClient;
@@ -55,7 +57,7 @@ import java.util.concurrent.ExecutionException;
  */
 public class BedrockHelper {
     /*
-    method to invoke AWS Bedrock model and get the response without streaming. 
+    method to invoke AWS Bedrock model and get the response without streaming.
     Parameters:
     ModelId: The ID of the Bedrock model to invoke.
     Body: The input to the model as a JSON string.
@@ -63,14 +65,14 @@ public class BedrockHelper {
     The response from the model as a JSON string.
     */
     public static String invokeModel(String modelId, String prompt) {
-        
+
 
             // Create a Bedrock Runtime client in the AWS Region you want to use.
             // Replace the DefaultCredentialsProvider with your preferred credentials provider.
 
         // Set the model ID, e.g., Claude 3 Haiku.
-            
-    
+
+
             // The InvokeModel API uses the model's native payload.
             // Learn more about the available inference parameters and response fields at:
             // https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
@@ -84,9 +86,9 @@ public class BedrockHelper {
                             "content": "{{prompt}}"
                         }]
                     }""";
-    
+
             // Define the prompt for the model.
-           
+
 
             // Embed the prompt in the model's native request payload.
             String nativeRequest = nativeRequestTemplate.replace("{{prompt}}", prompt);
@@ -97,30 +99,41 @@ public class BedrockHelper {
                         .body(SdkBytes.fromUtf8String(nativeRequest))
                         .modelId(modelId)
                 );
-    
+
                 // Decode the response body.
                 var responseBody = new JSONObject(response.body().asUtf8String());
-    
+
                 // Retrieve the generated text from the model's response.
 
                 return new JSONPointer("/content/0/text").queryFrom(responseBody).toString();
-    
-            } 
-            catch (SdkClientException e) 
+
+            }
+            catch (SdkClientException e)
             {
                 System.err.printf("ERROR: Can't invoke '%s'. Reason: %s", modelId, e.getMessage());
                 throw new RuntimeException(e);
             }
     }
 
+    private static boolean isRunningInAws() {
+        // One possible way to check if running in AWS Lambda environment:
+        return System.getenv("AWS_LAMBDA_FUNCTION_NAME") != null;
+    }
+
     private static BedrockRuntimeClient initClient() {
-        BedrockRuntimeClient client = BedrockRuntimeClient.builder()
-            .credentialsProvider(StaticCredentialsProvider.create(
+        if (isRunningInAws()) {
+            return BedrockRuntimeClient.builder()
+                .region(Region.of(System.getenv(SdkSystemSetting.AWS_REGION.environmentVariable())))
+                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
+                .build();
+        } else {
+            return BedrockRuntimeClient.builder()
+                .credentialsProvider(StaticCredentialsProvider.create(
                     AwsBasicCredentials.create(
-                            "AKIAX2DZEWJ54LNY5TTL", "FWPHleWlRcwTs1NwTkiNJPzbm0kvJOq6Xra8alhM")))
-            .region(Region.US_EAST_1)
-            .build();
-        return client;
+                        "AKIAX2DZEWJ54LNY5TTL", "FWPHleWlRcwTs1NwTkiNJPzbm0kvJOq6Xra8alhM")))
+                .region(Region.US_EAST_1)
+                .build();
+        }
     }
 
 
@@ -140,7 +153,7 @@ public class BedrockHelper {
                 .region(Region.US_EAST_1)
                 .build();
 
-  
+
 
         // The InvokeModelWithResponseStream API uses the model's native payload.
         // Learn more about the available inference parameters and response fields at:
@@ -156,7 +169,7 @@ public class BedrockHelper {
                     }]
                 }""";
 
-        
+
         // Embed the prompt in the model's native request payload.
         String nativeRequest = nativeRequestTemplate.replace("{{prompt}}", prompt);
 
@@ -197,7 +210,7 @@ public class BedrockHelper {
         }
     }
 
-   
+
     //method to invoke Bedrock Sonnet model with an image and text
     public static String converseApi(String modelId,String imagePath) throws IOException {
 
@@ -208,7 +221,7 @@ public class BedrockHelper {
                 .credentialsProvider(DefaultCredentialsProvider.create())
                 .build();
 
-        
+
         // Create the input text and embed it in a message object with the user role.
         var inputText = "Describe the content of the image.";
 
@@ -223,7 +236,7 @@ public class BedrockHelper {
                     .build())
                 .format(ImageFormat.JPEG)
                 .build()));
-        col.add(ContentBlock.fromText(inputText));     
+        col.add(ContentBlock.fromText(inputText));
 
         var message = Message.builder()
                 .content(col)
@@ -255,29 +268,29 @@ public class BedrockHelper {
 
     //function to invoke AWS Bedrock Agent
     public static String invokeAgent(String prompt,
-                                     String agentId, 
+                                     String agentId,
                                      String agentAlisId,
                                      String sessionId) throws ExecutionException, InterruptedException {
-        
+
         BedrockAgentRuntimeAsyncClient client  = BedrockAgentRuntimeAsyncClient.builder().build();
 
         var completeResponseTextBuffer = new StringBuilder();
-    
+
         var handler = InvokeAgentResponseHandler.builder()
                 .subscriber(InvokeAgentResponseHandler.Visitor.builder()
                         .onChunk(chunk -> completeResponseTextBuffer.append(chunk.bytes().asUtf8String()))
                         .build())
                 .build();
-    
+
         var request = InvokeAgentRequest.builder()
                 .agentId(agentId)
                 .agentAliasId(agentAlisId)
                 .sessionId(sessionId)
                 .inputText(prompt)
                 .build();
-    
+
         client.invokeAgent(request, handler).get();
-    
+
         String response =  completeResponseTextBuffer.toString();
         System.out.println(response);
         return response;
@@ -287,7 +300,7 @@ public class BedrockHelper {
     public static String documentInsight(String filePath,String modelId,String command) throws IOException {
         var client = BedrockRuntimeClient.builder().region(Region.US_EAST_1).build();
 
-        
+
         var fileContent = SdkBytes.fromByteArray(Files.readAllBytes(Paths.get(filePath)));
 
         var textMessage = ContentBlock.fromText(command);
@@ -301,7 +314,7 @@ public class BedrockHelper {
                         .role(ConversationRole.USER)
                         .content(textMessage, document)));
 
-        return response.output().message().content().get(0).text();    
+        return response.output().message().content().get(0).text();
     }
 
     public static String queryKnowledgeBase(String kbId,String text,String modelArn) throws InterruptedException, ExecutionException
@@ -310,52 +323,52 @@ public class BedrockHelper {
         return client.retrieveAndGenerate(RetrieveAndGenerateRequest.builder()
                 .input(RetrieveAndGenerateInput.builder()
                         .text(text)
-                        .build())  
+                        .build())
                 .retrieveAndGenerateConfiguration(RetrieveAndGenerateConfiguration.builder()
                         .knowledgeBaseConfiguration(KnowledgeBaseRetrieveAndGenerateConfiguration.builder()
                                         .knowledgeBaseId(kbId)
                                         .modelArn(modelArn)
-                                        .build() )                       
+                                        .build() )
                         .type(RetrieveAndGenerateType.KNOWLEDGE_BASE)
-                        .build())              
+                        .build())
                 .build())
         .get().output().text();
     }
 
- 
 
-    
+
+
     public static void analyzeIdWithTextract( String filePath) throws IOException {
 
         TextractClient textractClient = null;
         try {
                 textractClient= TextractClient.builder()
                 .build();
-           
+
                 // Create a Document object and import image
             Document myDoc = Document.builder()
                     .bytes(SdkBytes.fromByteArray(Files.readAllBytes(Paths.get(filePath))))
                     .build();
-            
+
             AnalyzeIdRequest analyzeIdRequest = AnalyzeIdRequest.builder()
                     .documentPages(myDoc).build();
-            
+
             AnalyzeIdResponse analyzeId = textractClient.analyzeID(analyzeIdRequest);
-            
-           // System.out.println(analyzeExpense.toString());          
+
+           // System.out.println(analyzeExpense.toString());
             List<IdentityDocument> Docs = analyzeId.identityDocuments();
             for (IdentityDocument doc: Docs) {
                doc.identityDocumentFields().forEach((field)->{
                   System.out.println(field.toString());
                });;
             }
-            
-            
-        } 
+
+
+        }
         catch (TextractException e) {
 
             System.err.println(e.getMessage());
-            
+
         }
         finally
         {
