@@ -24,14 +24,6 @@ public class TestLambda implements RequestHandler<APIGatewayProxyRequestEvent, A
   public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
     String userMessage = request.getBody();
 
-    if (true) {
-      APIGatewayProxyResponseEvent responseEvent = new APIGatewayProxyResponseEvent();
-      responseEvent.setStatusCode(200);
-      responseEvent.setBody(userMessage);
-
-      return responseEvent;
-    }
-
     BedrockRuntimeClient client = BedrockRuntimeClient.builder().region(Region.US_EAST_1).build();
 
     String modelId = "anthropic.claude-3-sonnet-20240229-v1:0";
