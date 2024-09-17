@@ -189,7 +189,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     private boolean mandatoryDataFilled(OfferQueryResponse offerQueryResponse) {
         return !offerQueryResponse.getPassengers().isEmpty()
                 && offerQueryResponse.getDeparture() != null
-                && !offerQueryResponse.getArrival().isEmpty()
+                && offerQueryResponse.getArrival() != null
                 && offerQueryResponse.getDepartureDate() != null;
     }
 }
