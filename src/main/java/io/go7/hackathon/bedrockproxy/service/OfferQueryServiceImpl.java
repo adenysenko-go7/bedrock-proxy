@@ -1,7 +1,5 @@
 package io.go7.hackathon.bedrockproxy.service;
 
-import io.go7.commons.flight.AirportCode;
-import io.go7.commons.flight.PassengerTypeGroup;
 import io.go7.hackathon.bedrockproxy.beans.OfferQueryResponse;
 import io.go7.hackathon.bedrockproxy.beans.PassengerQuantity;
 import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
@@ -9,7 +7,6 @@ import io.go7.hackathon.bedrockproxy.utils.BedrockHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-//import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -50,7 +47,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
             fillDepartureDate(map, offerQueryResponse);
 
             if (offerQueryResponse.getPassengers().isEmpty()) {
-                offerQueryResponse.getPassengers().add(new PassengerQuantity(PassengerTypeGroup.ADULT, 1));
+                offerQueryResponse.getPassengers().add(new PassengerQuantity("ADT", 1));
             }
 
             if(offerQueryResponse.getDepartureDate() == null) {
@@ -99,7 +96,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     private void fillArrival(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
         try {
             if (map.containsKey("arrival")) {
-                offerQueryResponse.getArrival().add(AirportCode.of(map.get("arrival").toString()));
+                offerQueryResponse.setArrival(map.get("arrival").toString());
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -109,7 +106,7 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     private void fillDeparture(Map<String, Object> map, OfferQueryResponse offerQueryResponse) {
         try {
             if (map.containsKey("departure")) {
-                offerQueryResponse.setDeparture(AirportCode.of(map.get("departure").toString()));
+                offerQueryResponse.setDeparture(map.get("departure").toString());
             }
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -118,18 +115,18 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     private void generateHint(OfferQueryResponse offerQueryResponse) {
         if (offerQueryResponse.getDeparture() == null
-                && offerQueryResponse.getArrival().isEmpty()
+                && offerQueryResponse.getArrival() == null
                 && offerQueryResponse.getDepartureDate() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your departure and arrival places and date for your trip");
-        } else if (offerQueryResponse.getDeparture() == null && offerQueryResponse.getArrival().isEmpty()) {
+        } else if (offerQueryResponse.getDeparture() == null && offerQueryResponse.getArrival() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your departure and arrival places are");
-        } else if (offerQueryResponse.getDepartureDate() == null && offerQueryResponse.getArrival().isEmpty()) {
+        } else if (offerQueryResponse.getDepartureDate() == null && offerQueryResponse.getArrival() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your arrival place and trip date");
         } else if (offerQueryResponse.getDepartureDate() == null && offerQueryResponse.getDepartureDate() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your departure and trip date");
         } else if (offerQueryResponse.getDeparture() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your departure place");
-        } else if (offerQueryResponse.getArrival().isEmpty()) {
+        } else if (offerQueryResponse.getArrival() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your arrival place");
         } else if (offerQueryResponse.getDepartureDate() == null) {
             offerQueryResponse.setRequestHint("Please provide information about where your trip date");
