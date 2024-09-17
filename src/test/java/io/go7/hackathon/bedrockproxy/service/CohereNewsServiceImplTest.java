@@ -1,8 +1,5 @@
 package io.go7.hackathon.bedrockproxy.service;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import io.go7.hackathon.bedrockproxy.beans.OfferQueryResponse;
 
 import org.junit.jupiter.api.Test;
@@ -31,7 +28,7 @@ class CohereNewsServiceImplTest {
         OfferQueryResponse offerQueryResponse = new OfferQueryResponse();
         offerQueryResponse.setFinalResult(true);
 
-        List<String> recommendations = cohereNewsService.getRecommendations(airports[random.nextInt(0, 50)], date);
+        List<String> recommendations = cohereNewsService.getRecommendations(airports[random.nextInt(0, airports.length)], date);
 
         assert !recommendations.isEmpty();
     }

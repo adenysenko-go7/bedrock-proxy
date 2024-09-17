@@ -386,6 +386,7 @@ public class BedrockHelper {
                 {
                     "message": "{{prompt}}",
                     "temperature": 1,
+                    "p": 0.01,
                     "return_prompt": true
                 }""";
 
@@ -411,7 +412,6 @@ public class BedrockHelper {
                 String string = array.getString(i);
                 strings.add(string);
             }
-
 
             return strings;
 
